@@ -149,12 +149,78 @@ Plus an **Earnings Leaderboard** ranking teams by total prize money:
 
 ### Other Features
 
-- Retrieve league information
-- Access team statistics
-- Get player statistics
-- View league standings
-- Check matchups
-- Obtain season statistics
+#### 📋 League Information
+View comprehensive details about your fantasy league.
+
+```
+League: x-lte
+Season: 2024
+Teams: 12
+Current Week: 17
+League ID: 530952
+League Key: 449.l.530952
+```
+
+#### 📊 Team Statistics
+Access detailed statistics for each team in your league.
+
+```
+Team: Thunderbolts
+Owner: John D.
+Record: 10-4
+Points For: 1,847.52
+Points Against: 1,623.18
+Streak: W3
+```
+
+#### 🏈 Player Statistics
+Get performance data for individual players.
+
+```
+Player: Josh Allen (QB - BUF)
+Week 14 Stats:
+  Passing Yards: 342
+  Passing TDs: 3
+  Rushing Yards: 45
+  Fantasy Points: 32.68
+```
+
+#### 🏅 League Standings
+View current rankings and playoff positions.
+
+```
+Rank | Team Name      | Record | Points For | Points Against
+-----|----------------|--------|------------|---------------
+  1  | Thunderbolts   | 10-4   | 1,847.52   | 1,623.18
+  2  | Power Rangers  |  9-5   | 1,789.34   | 1,654.22
+  3  | Trojans        |  8-6   | 1,756.89   | 1,701.45
+...
+```
+
+#### 🎯 Weekly Matchups
+Check head-to-head matchups for any week.
+
+```
+Week 14 Matchups:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Thunderbolts (142.56) vs Power Rangers (128.34)  ✓ Thunderbolts WIN
+Trojans (135.22) vs DaBears (119.87)             ✓ Trojans WIN
+Bulldawgs (127.45) vs Sith Happens (131.20)      ✓ Sith Happens WIN
+...
+```
+
+#### 📈 Season Statistics
+Obtain aggregated stats across the entire season.
+
+```
+Season Summary (2024):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Highest Single Week Score: 186.42 (Thunderbolts, Week 8)
+Lowest Single Week Score: 78.56 (DaBears, Week 3)
+Average Weekly Score: 124.67
+Most Consistent Team: Power Rangers (Std Dev: 12.3)
+Total Points Scored: 20,943.56
+```
 
 ## Contributing
 
