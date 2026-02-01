@@ -162,12 +162,28 @@ class FantasyFootballTreasurer:
                                                     team['logo_url'] = logos[0].get('team_logo', {}).get('url', '')
                                             if 'managers' in detail:
                                                 managers = detail['managers']
+                                                # Handle managers as list
                                                 if isinstance(managers, list) and managers:
-                                                    mgr = managers[0].get('manager', {})
-                                                    team['manager'] = mgr.get('nickname', '')
+                                                    for mgr_item in managers:
+                                                        if isinstance(mgr_item, dict) and 'manager' in mgr_item:
+                                                            mgr = mgr_item['manager']
+                                                            team['manager'] = mgr.get('nickname', '') or mgr.get('guid', '')
+                                                            break
+                                                        elif isinstance(mgr_item, dict):
+                                                            team['manager'] = mgr_item.get('nickname', '') or mgr_item.get('guid', '')
+                                                            break
+                                                # Handle managers as dict
                                                 elif isinstance(managers, dict):
-                                                    mgr = managers.get('0', {}).get('manager', {})
-                                                    team['manager'] = mgr.get('nickname', '')
+                                                    for key, mgr_item in managers.items():
+                                                        if key == 'count':
+                                                            continue
+                                                        if isinstance(mgr_item, dict):
+                                                            if 'manager' in mgr_item:
+                                                                mgr = mgr_item['manager']
+                                                                team['manager'] = mgr.get('nickname', '') or mgr.get('guid', '')
+                                                            else:
+                                                                team['manager'] = mgr_item.get('nickname', '') or mgr_item.get('guid', '')
+                                                            break
                                             if 'waiver_priority' in detail:
                                                 team['waiver_priority'] = int(detail['waiver_priority'])
                                             if 'number_of_moves' in detail:

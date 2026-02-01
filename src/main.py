@@ -278,28 +278,283 @@ async def print_player_stats(agent, teams: list):
         print()
 
 
+def print_team_owners(teams: list):
+    """Print a clean table of team names and their owners."""
+    print("\n" + "=" * 60)
+    print("👥 TEAM OWNERS")
+    print("=" * 60 + "\n")
+    
+    if not teams:
+        print("   No team data available.")
+        return
+    
+    # Calculate column widths
+    max_team_len = max(len(t['name']) for t in teams) if teams else 20
+    max_team_len = max(max_team_len, 15)
+    max_owner_len = max(len(t['manager'] or 'N/A') for t in teams) if teams else 15
+    max_owner_len = max(max_owner_len, 10)
+    
+    # Header
+    header = f"   {'#':<4} | {'Team Name':<{max_team_len}} | {'Owner/Manager':<{max_owner_len}}"
+    print(header)
+    print(f"   {'-' * (len(header) - 3)}")
+    
+    # Rows
+    for i, team in enumerate(teams, 1):
+        owner = team['manager'] or 'N/A'
+        print(f"   {i:<4} | {team['name']:<{max_team_len}} | {owner:<{max_owner_len}}")
+    
+    print()
+
+
+async def multi_year_treasurer(agent, all_leagues: list):
+    """Calculate prize money earnings by owner across multiple years."""
+    print("\n" + "=" * 70)
+    print("📅 MULTI-YEAR TREASURER")
+    print("=" * 70)
+    print("\nThis feature calculates total earnings by OWNER across multiple seasons.\n")
+    
+    # Get available years from leagues
+    available_years = sorted(set(l['season'] for l in all_leagues))
+    print(f"Available seasons: {available_years}")
+    
+    # Get start year
+    while True:
+        try:
+            start_year = int(input("\nEnter start year: ").strip())
+            if start_year in available_years:
+                break
+            else:
+                print(f"❌ Year {start_year} not available. Choose from: {available_years}")
+        except ValueError:
+            print("❌ Please enter a valid year.")
+    
+    # Get end year
+    while True:
+        try:
+            end_year = int(input("Enter end year: ").strip())
+            if end_year in available_years and end_year >= start_year:
+                break
+            elif end_year < start_year:
+                print(f"❌ End year must be >= start year ({start_year}).")
+            else:
+                print(f"❌ Year {end_year} not available. Choose from: {available_years}")
+        except ValueError:
+            print("❌ Please enter a valid year.")
+    
+    # Get unique league names
+    unique_names = sorted(set(l['name'] for l in all_leagues))
+    print(f"\nAvailable leagues: {unique_names}")
+    
+    league_name = input("\nEnter league name to search for: ").strip()
+    
+    # Find matching leagues in the year range
+    matching_leagues = [
+        l for l in all_leagues 
+        if league_name.lower() in l['name'].lower() 
+        and start_year <= l['season'] <= end_year
+    ]
+    
+    if not matching_leagues:
+        print(f"\n❌ No leagues matching '{league_name}' found between {start_year}-{end_year}.")
+        return
+    
+    matching_leagues = sorted(matching_leagues, key=lambda x: x['season'])
+    print(f"\n✅ Found {len(matching_leagues)} matching league(s):")
+    for l in matching_leagues:
+        print(f"   📅 {l['season']}: {l['name']} (ID: {l['league_id']})")
+    
+    # Get prize inputs (once for all years)
+    print("\n💰 Prize Money Configuration (applies to all years)")
+    print("-" * 50)
+    
+    while True:
+        try:
+            pos1_prize = float(input("Enter prize for 1st place each week ($): ").strip())
+            if pos1_prize >= 0:
+                break
+            print("❌ Please enter a positive number.")
+        except ValueError:
+            print("❌ Please enter a valid number.")
+    
+    while True:
+        try:
+            pos2_prize = float(input("Enter prize for 2nd place each week ($): ").strip())
+            if pos2_prize >= 0:
+                break
+            print("❌ Please enter a positive number.")
+        except ValueError:
+            print("❌ Please enter a valid number.")
+    
+    while True:
+        try:
+            pos3_prize = float(input("Enter prize for 3rd place each week ($): ").strip())
+            if pos3_prize >= 0:
+                break
+            print("❌ Please enter a positive number.")
+        except ValueError:
+            print("❌ Please enter a valid number.")
+    
+    while True:
+        try:
+            num_weeks = int(input("Enter number of weeks to analyze per season: ").strip())
+            if num_weeks >= 1:
+                break
+            print("❌ Please enter at least 1 week.")
+        except ValueError:
+            print("❌ Please enter a valid number.")
+    
+    # Process each year
+    owner_totals = {}  # owner_name -> {total: float, years: {year: amount}}
+    year_summaries = {}  # year -> {team_name: amount}
+    team_to_owner_global = {}  # Keep track of team->owner mapping across years
+    
+    print(f"\n📊 Processing {len(matching_leagues)} season(s)...")
+    print("=" * 70)
+    
+    for league in matching_leagues:
+        year = league['season']
+        print(f"\n📅 {year}: {league['name']}")
+        print("-" * 50)
+        
+        # Get team info to map team names to owners
+        await asyncio.sleep(0.5)  # Rate limiting
+        teams = await agent.get_all_teams_info(league['league_key'])
+        team_to_owner = {}
+        print(f"   Teams found: {len(teams)}")
+        for team in teams:
+            owner = team['manager'] if team['manager'] else team['name']
+            team_to_owner[team['name']] = owner
+            team_to_owner_global[team['name']] = owner  # Store globally
+            # Debug: show team->owner mapping
+            # print(f"      {team['name']} -> {owner}")
+        
+        # Get weekly scores with rate limiting
+        weekly_rankings = {}
+        for week in range(1, num_weeks + 1):
+            await asyncio.sleep(0.3)  # Rate limiting between API calls
+            scores = await agent.get_weekly_scores(league['league_key'], week)
+            if scores:
+                sorted_scores = sorted(scores, key=lambda x: x.points, reverse=True)
+                weekly_rankings[week] = [s.team_name for s in sorted_scores[:3]]
+                print(f"   Week {week}: ✅")
+            else:
+                weekly_rankings[week] = []
+                print(f"   Week {week}: ⚠️ No data")
+        
+        # Calculate team earnings for this year
+        team_earnings = {}
+        for week, rankings in weekly_rankings.items():
+            for rank, team_name in enumerate(rankings, 1):
+                if team_name not in team_earnings:
+                    team_earnings[team_name] = 0
+                if rank == 1:
+                    team_earnings[team_name] += pos1_prize
+                elif rank == 2:
+                    team_earnings[team_name] += pos2_prize
+                elif rank == 3:
+                    team_earnings[team_name] += pos3_prize
+        
+        year_summaries[year] = team_earnings
+        
+        # Aggregate by owner
+        for team_name, amount in team_earnings.items():
+            owner = team_to_owner.get(team_name, team_name)
+            if owner not in owner_totals:
+                owner_totals[owner] = {'total': 0, 'years': {}}
+            owner_totals[owner]['total'] += amount
+            owner_totals[owner]['years'][year] = owner_totals[owner]['years'].get(year, 0) + amount
+    
+    # Print results
+    print("\n" + "=" * 70)
+    print(f"📊 MULTI-YEAR EARNINGS SUMMARY ({start_year}-{end_year})")
+    print("=" * 70)
+    print(f"\n   League: {league_name}")
+    print(f"   Seasons: {start_year} - {end_year} ({len(matching_leagues)} seasons)")
+    print(f"   Weeks per season: {num_weeks}")
+    print(f"   Prizes: 1st=${pos1_prize:.2f}, 2nd=${pos2_prize:.2f}, 3rd=${pos3_prize:.2f}")
+    
+    # Print team to owner mapping
+    print("\n" + "-" * 70)
+    print("👥 TEAM TO OWNER MAPPING")
+    print("-" * 70)
+    for team_name, owner_name in sorted(team_to_owner_global.items()):
+        print(f"   {team_name} -> {owner_name}")
+    
+    # Print yearly breakdown
+    print("\n" + "-" * 70)
+    print("📅 EARNINGS BY YEAR (by Team)")
+    print("-" * 70)
+    
+    years = sorted(year_summaries.keys())
+    for year in years:
+        print(f"\n   {year}:")
+        year_data = year_summaries[year]
+        sorted_teams = sorted(year_data.items(), key=lambda x: x[1], reverse=True)
+        for team, amount in sorted_teams:
+            if amount > 0:
+                print(f"      {team}: ${amount:.2f}")
+    
+    # Print owner leaderboard
+    print("\n" + "=" * 70)
+    print("🏆 TOTAL EARNINGS BY OWNER")
+    print("=" * 70 + "\n")
+    
+    sorted_owners = sorted(owner_totals.items(), key=lambda x: x[1]['total'], reverse=True)
+    
+    max_owner_len = max(len(o) for o, _ in sorted_owners) if sorted_owners else 15
+    
+    # Header with years
+    header = f"   {'Rank':<6} | {'Owner':<{max_owner_len}}"
+    for year in years:
+        header += f" | {year:>10}"
+    header += f" | {'TOTAL':>12}"
+    print(header)
+    print(f"   {'-' * (len(header) - 3)}")
+    
+    for rank, (owner, data) in enumerate(sorted_owners, 1):
+        if data['total'] > 0:
+            medal = ["🥇", "🥈", "🥉"][rank - 1] if rank <= 3 else f"{rank}."
+            row = f"   {medal:<6} | {owner:<{max_owner_len}}"
+            for year in years:
+                year_amount = data['years'].get(year, 0)
+                if year_amount > 0:
+                    row += f" | ${year_amount:>9.2f}"
+                else:
+                    row += f" | {'-':>10}"
+            row += f" | ${data['total']:>11.2f}"
+            print(row)
+    
+    # Grand total
+    grand_total = sum(d['total'] for d in owner_totals.values())
+    print(f"\n   {'─' * 50}")
+    print(f"   💰 GRAND TOTAL PAID OUT: ${grand_total:.2f}")
+    print()
+
+
 def show_main_menu():
     """Display the main menu and get user choice."""
     print("\n" + "=" * 60)
     print("📌 MAIN MENU")
     print("=" * 60)
-    print("   1. 🏆 League Treasurer (Prize Money Calculator)")
-    print("   2. 📊 View Team Statistics")
-    print("   3. 🏈 View Player Rosters")
-    print("   4. 🏅 View League Standings")
-    print("   5. 🎯 View Weekly Matchups (Coming Soon)")
-    print("   6. 📈 View Season Statistics (Coming Soon)")
-    print("   7. 🔄 Switch League")
-    print("   8. 👋 Exit")
+    print("   1. 🏆 League Treasurer (Single Season)")
+    print("   2. 📅 Multi-Year Treasurer (Earnings by Owner)")
+    print("   3. 📊 View Team Statistics")
+    print("   4. 🏈 View Player Rosters")
+    print("   5. 🏅 View League Standings")
+    print("   6. 🎯 View Weekly Matchups (Coming Soon)")
+    print("   7. 📈 View Season Statistics (Coming Soon)")
+    print("   8. 🔄 Switch League")
+    print("   9. 👋 Exit")
     print("-" * 60)
     
     while True:
         try:
-            choice = input("Enter your choice (1-8): ").strip()
-            if choice in ['1', '2', '3', '4', '5', '6', '7', '8']:
+            choice = input("Enter your choice (1-9): ").strip()
+            if choice in ['1', '2', '3', '4', '5', '6', '7', '8', '9']:
                 return int(choice)
             else:
-                print("Invalid choice. Please enter 1-8.")
+                print("Invalid choice. Please enter 1-9.")
         except ValueError:
             print("Please enter a number.")
 
@@ -428,35 +683,39 @@ async def run():
             print_prize_table(weekly_rankings, prizes)
         
         elif menu_choice == 2:
+            # Multi-Year Treasurer
+            await multi_year_treasurer(agent, all_leagues)
+        
+        elif menu_choice == 3:
             # Team Statistics
             print(f"\n📊 Fetching team statistics for {selected_league['name']}...")
             teams = await agent.get_all_teams_info(selected_league['league_key'])
             standings = await agent.get_league_standings(selected_league['league_key'])
             print_team_stats(teams, standings)
         
-        elif menu_choice == 3:
+        elif menu_choice == 4:
             # Player Rosters
             print(f"\n🏈 Fetching team rosters for {selected_league['name']}...")
             teams = await agent.get_all_teams_info(selected_league['league_key'])
             await print_player_stats(agent, teams)
         
-        elif menu_choice == 4:
+        elif menu_choice == 5:
             # League Standings
             print(f"\n🏅 Fetching league standings for {selected_league['name']}...")
             standings = await agent.get_league_standings(selected_league['league_key'])
             print_standings(standings)
         
-        elif menu_choice == 5:
+        elif menu_choice == 6:
             # Weekly Matchups - Coming Soon
             print("\n🎯 Weekly Matchups feature is coming soon!")
             print("   This feature will show head-to-head matchups for any week.")
         
-        elif menu_choice == 6:
+        elif menu_choice == 7:
             # Season Statistics - Coming Soon
             print("\n📈 Season Statistics feature is coming soon!")
             print("   This feature will show aggregated stats across the entire season.")
         
-        elif menu_choice == 7:
+        elif menu_choice == 8:
             # Switch League
             print("\n🔄 Select a different league:")
             print("-" * 60)
@@ -477,7 +736,7 @@ async def run():
                 except ValueError:
                     print("Please enter a number.")
         
-        elif menu_choice == 8:
+        elif menu_choice == 9:
             # Exit
             break
     
