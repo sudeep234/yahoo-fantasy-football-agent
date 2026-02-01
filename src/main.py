@@ -339,14 +339,23 @@ async def run():
     # Initialize the agent with the client
     agent = FantasyFootballTreasurer(client)
     
-    # List all leagues from last 5 years
-    print("📋 Fetching all your Fantasy Football leagues (2021-2025)...")
+    # Discover available game keys
+    print("🔍 Discovering available NFL seasons...")
+    game_keys = await agent.discover_game_keys()
+    if game_keys:
+        print(f"   Found {len(game_keys)} season(s): {sorted(game_keys.keys(), reverse=True)}")
+        for season in sorted(game_keys.keys(), reverse=True):
+            print(f"      {season}: game_key={game_keys[season]}")
+    print()
+    
+    # List all leagues from discovered seasons
+    print("📋 Fetching all your Fantasy Football leagues...")
     print("=" * 60)
     
     leagues_by_year = await agent.list_all_leagues_all_years()
     
     if not leagues_by_year:
-        print("❌ No leagues found for 2021-2025.")
+        print("❌ No leagues found.")
         print("\n   This could mean:")
         print("   - You're not in any Fantasy Football leagues")
         print("   - The API permissions are not set correctly")

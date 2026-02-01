@@ -26,7 +26,19 @@ class FantasyFootballTreasurer:
                 for item in league_data:
                     if isinstance(item, dict) and 'standings' in item:
                         standings_obj = item['standings']
-                        teams_obj = standings_obj.get('0', {}).get('teams', {})
+                        
+                        # Handle standings as list or dict
+                        teams_obj = None
+                        if isinstance(standings_obj, dict):
+                            teams_obj = standings_obj.get('0', {}).get('teams', {})
+                        elif isinstance(standings_obj, list):
+                            for s_item in standings_obj:
+                                if isinstance(s_item, dict) and 'teams' in s_item:
+                                    teams_obj = s_item['teams']
+                                    break
+                        
+                        if teams_obj is None:
+                            continue
                         
                         if isinstance(teams_obj, dict):
                             teams_list = [v for k, v in teams_obj.items() if k != 'count']
@@ -248,22 +260,75 @@ class FantasyFootballTreasurer:
         
         return players
 
+    async def discover_game_keys(self) -> Dict[int, str]:
+        """Discover all available NFL game keys from Yahoo API."""
+        games_data = await self.client.get_all_nfl_games()
+        game_keys = {}
+        
+        if not games_data:
+            return game_keys
+        
+        try:
+            fantasy_content = games_data.get('fantasy_content', {})
+            users = fantasy_content.get('users', {})
+            
+            if isinstance(users, dict):
+                user = users.get('0', {}).get('user', [])
+            elif isinstance(users, list):
+                user = users[0] if users else []
+            else:
+                user = []
+            
+            for item in user:
+                if isinstance(item, dict) and 'games' in item:
+                    games = item['games']
+                    
+                    if isinstance(games, dict):
+                        games_list = [v for k, v in games.items() if k != 'count']
+                    elif isinstance(games, list):
+                        games_list = games
+                    else:
+                        continue
+                    
+                    for game_value in games_list:
+                        if not isinstance(game_value, dict):
+                            continue
+                        
+                        game_info = game_value.get('game', [])
+                        if isinstance(game_info, list) and game_info:
+                            game_data = game_info[0] if isinstance(game_info[0], dict) else {}
+                        elif isinstance(game_info, dict):
+                            game_data = game_info
+                        else:
+                            continue
+                        
+                        game_key = game_data.get('game_key')
+                        season = game_data.get('season')
+                        
+                        if game_key and season:
+                            game_keys[int(season)] = game_key
+                            
+        except (KeyError, TypeError, IndexError, ValueError) as e:
+            print(f"Error discovering game keys: {e}")
+        
+        return game_keys
+
     async def list_all_leagues(self, season: int = None) -> List[Dict]:
         """List all leagues for a given season or all seasons if None."""
         if season:
             return await self._get_leagues_for_season(season)
         else:
-            # Get leagues for last 5 years
+            # Get leagues for last 6 years
             all_leagues = []
-            for year in range(2021, 2026):
+            for year in range(2021, 2027):
                 leagues = await self._get_leagues_for_season(year)
                 all_leagues.extend(leagues)
             return all_leagues
     
     async def list_all_leagues_all_years(self) -> Dict[int, List[Dict]]:
-        """List all leagues grouped by year for last 5 years."""
+        """List all leagues grouped by year for last 6 years."""
         leagues_by_year = {}
-        for year in range(2021, 2026):
+        for year in range(2021, 2027):
             leagues = await self._get_leagues_for_season(year)
             if leagues:
                 leagues_by_year[year] = leagues
@@ -314,6 +379,11 @@ class FantasyFootballTreasurer:
                             if not isinstance(game_item, dict):
                                 continue
                             
+                            # Extract actual season from game data
+                            actual_season = game_item.get('season', season)
+                            if isinstance(actual_season, str):
+                                actual_season = int(actual_season)
+                            
                             if 'leagues' not in game_item:
                                 continue
                             
@@ -336,13 +406,18 @@ class FantasyFootballTreasurer:
                                     league_info = [league_info]
                                 
                                 if league_info and isinstance(league_info[0], dict):
+                                    # Try to get season from league info first, then game data
+                                    league_season = league_info[0].get('season', actual_season)
+                                    if isinstance(league_season, str):
+                                        league_season = int(league_season)
+                                    
                                     league = {
                                         'name': league_info[0].get('name', 'Unknown'),
                                         'league_id': league_info[0].get('league_id'),
                                         'league_key': league_info[0].get('league_key'),
                                         'num_teams': league_info[0].get('num_teams'),
                                         'current_week': league_info[0].get('current_week'),
-                                        'season': season
+                                        'season': league_season
                                     }
                                     leagues.append(league)
         except (KeyError, TypeError, IndexError) as e:

@@ -32,6 +32,11 @@ class YahooFantasyClient:
         endpoint = f"users;use_login=1/games;game_keys={game_key}/leagues?format=json"
         return await self._request(endpoint)
     
+    async def get_all_nfl_games(self) -> Optional[Dict]:
+        """Get all NFL fantasy games (to discover game keys)."""
+        endpoint = "users;use_login=1/games;game_codes=nfl?format=json"
+        return await self._request(endpoint)
+    
     async def get_leagues_by_season(self, season: int) -> Optional[List[Dict]]:
         """Get leagues for a specific season."""
         game_key = self._get_game_key(season)
@@ -75,9 +80,14 @@ class YahooFantasyClient:
     
     def _get_game_key(self, season: int) -> str:
         """Get Yahoo game key for NFL season."""
+        # Yahoo Fantasy NFL game keys by season
+        # These are assigned by Yahoo each year - extracted from league_key format: {game_key}.l.{league_id}
         game_keys = {
+            2021: "406",
+            2022: "414",
             2023: "423",
             2024: "449",
-            2025: "453"
+            2025: "453",  # 2025 NFL season
+            2026: "nfl"   # Future season - will use generic key
         }
         return game_keys.get(season, "nfl")
