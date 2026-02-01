@@ -121,22 +121,23 @@ After authenticating and selecting a league, you'll see the main menu:
 ============================================================
 📌 MAIN MENU
 ============================================================
-   1. 🏆 League Treasurer (Prize Money Calculator)
-   2. 📊 View Team Statistics
-   3. 🏈 View Player Rosters
-   4. 🏅 View League Standings
-   5. 🎯 View Weekly Matchups (Coming Soon)
-   6. 📈 View Season Statistics (Coming Soon)
-   7. 🔄 Switch League
-   8. 👋 Exit
+   1. 🏆 Single Season Treasurer (Prize Money Calculator)
+   2. 📅 Multi-Year Treasurer (Aggregate by Owner)
+   3. 📊 View Team Statistics
+   4. 🏈 View Player Rosters
+   5. 🏅 View League Standings
+   6. 🎯 View Weekly Matchups (Coming Soon)
+   7. 📈 View Season Statistics (Coming Soon)
+   8. 🔄 Switch League
+   9. 👋 Exit
 ------------------------------------------------------------
 ```
 
 ---
 
-### 1. 🏆 League Treasurer (Prize Money Calculator)
+### 1. 🏆 Single Season Treasurer (Prize Money Calculator)
 
-The main feature of this application - calculates weekly prize money earnings for all teams in your fantasy football league.
+Calculates weekly prize money earnings for all teams in your fantasy football league for a single season.
 
 **How to Use:**
 1. Select option `1` from the main menu
@@ -174,12 +175,59 @@ Plus an **Earnings Leaderboard**:
 
 ---
 
-### 2. 📊 View Team Statistics
+### 2. 📅 Multi-Year Treasurer (Aggregate by Owner)
+
+**The flagship feature!** Aggregates prize money earnings across multiple seasons, grouped by owner name. This is perfect for leagues that have run for multiple years and want to see total historical earnings.
+
+**How to Use:**
+1. Select option `2` from the main menu
+2. Enter the year range (e.g., 2021-2025)
+3. Enter prize amounts for 1st, 2nd, and 3rd place
+4. Enter the number of weeks per season to analyze
+5. Wait while the application fetches data from each season (rate-limited to avoid API throttling)
+
+**Inputs Required:**
+| Input | Description |
+|-------|-------------|
+| Start Year | First year to include (e.g., 2021) |
+| End Year | Last year to include (e.g., 2025) |
+| 1st Place Prize | Dollar amount for highest scorer each week |
+| 2nd Place Prize | Dollar amount for second highest scorer |
+| 3rd Place Prize | Dollar amount for third highest scorer |
+| Number of Weeks | Weeks per season to analyze |
+
+**Output Generated:**
+
+```
+================================================================================
+📊 MULTI-YEAR EARNINGS SUMMARY (2021-2025)
+================================================================================
+
+Owner Name                                          | Total Earnings
+--------------------------------------------------------------------------------
+John Smith                                          |        $485.00
+Sarah Johnson                                       |        $420.00
+Mike Williams                                       |        $380.00
+...
+--------------------------------------------------------------------------------
+GRAND TOTAL                                         |      $2,250.00
+================================================================================
+```
+
+**Features:**
+- Automatically discovers game keys for each NFL season
+- Handles owner changes (same owner across different team names)
+- Rate-limited API calls to prevent throttling
+- Shows team-to-owner mapping for verification
+
+---
+
+### 3. 📊 View Team Statistics
 
 View detailed statistics for each team in your league.
 
 **How to Use:**
-1. Select option `2` from the main menu
+1. Select option `3` from the main menu
 2. Statistics for all teams are displayed automatically
 
 **Output Example:**
@@ -205,7 +253,7 @@ View detailed statistics for each team in your league.
 View the roster (players) for any team in your league.
 
 **How to Use:**
-1. Select option `3` from the main menu
+1. Select option `4` from the main menu
 2. Choose a specific team or view all teams
 3. View the roster with player positions and status
 
@@ -234,7 +282,7 @@ View the roster (players) for any team in your league.
 View current rankings with records and point totals.
 
 **How to Use:**
-1. Select option `4` from the main menu
+1. Select option `5` from the main menu
 2. Standings are displayed automatically
 
 **Output Example:**
@@ -253,7 +301,7 @@ Rank   | Team Name        | Record     |   Points For |   Points Against | Strea
 
 ---
 
-### 5. 🎯 View Weekly Matchups *(Coming Soon)*
+### 6. 🎯 View Weekly Matchups *(Coming Soon)*
 
 Check head-to-head matchups for any week.
 
@@ -269,7 +317,7 @@ Bulldawgs (127.45) vs Sith Happens (131.20)      ✓ Sith Happens WIN
 
 ---
 
-### 6. 📈 View Season Statistics *(Coming Soon)*
+### 7. 📈 View Season Statistics *(Coming Soon)*
 
 Obtain aggregated stats across the entire season.
 
@@ -286,18 +334,18 @@ Total Points Scored: 20,943.56
 
 ---
 
-### 7. 🔄 Switch League
+### 8. 🔄 Switch League
 
 Switch to a different league without restarting the application.
 
 **How to Use:**
-1. Select option `7` from the main menu
+1. Select option `8` from the main menu
 2. Choose from the list of your available leagues (current league marked with 👈)
 3. Continue using other features with the new league
 
 ---
 
-### 8. 👋 Exit
+### 9. 👋 Exit
 
 Exit the application. Your credentials are automatically cleared from memory.
 
