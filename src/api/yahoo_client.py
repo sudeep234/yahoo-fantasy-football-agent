@@ -68,6 +68,11 @@ class YahooFantasyClient:
         endpoint = f"league/{league_key}/scoreboard;week={week}?format=json"
         return await self._request(endpoint)
     
+    async def get_team_roster(self, team_key: str) -> Optional[Dict]:
+        """Get roster for a specific team."""
+        endpoint = f"team/{team_key}/roster?format=json"
+        return await self._request(endpoint)
+    
     def _get_game_key(self, season: int) -> str:
         """Get Yahoo game key for NFL season."""
         game_keys = {

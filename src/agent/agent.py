@@ -10,6 +10,244 @@ class FantasyFootballTreasurer:
     def __init__(self, client: YahooFantasyClient):
         self.client = client
     
+    async def get_league_standings(self, league_key: str) -> List[Dict]:
+        """Get league standings with team records and points."""
+        standings_data = await self.client.get_league_standings(league_key)
+        standings = []
+        
+        if not standings_data:
+            return standings
+        
+        try:
+            fantasy_content = standings_data.get('fantasy_content', {})
+            league_data = fantasy_content.get('league', [])
+            
+            if isinstance(league_data, list):
+                for item in league_data:
+                    if isinstance(item, dict) and 'standings' in item:
+                        standings_obj = item['standings']
+                        teams_obj = standings_obj.get('0', {}).get('teams', {})
+                        
+                        if isinstance(teams_obj, dict):
+                            teams_list = [v for k, v in teams_obj.items() if k != 'count']
+                        else:
+                            teams_list = teams_obj if isinstance(teams_obj, list) else []
+                        
+                        for team_data in teams_list:
+                            if not isinstance(team_data, dict):
+                                continue
+                            
+                            team_info = team_data.get('team', [])
+                            if isinstance(team_info, dict):
+                                team_info = [team_info]
+                            
+                            team = {
+                                'name': '',
+                                'team_key': '',
+                                'rank': 0,
+                                'wins': 0,
+                                'losses': 0,
+                                'ties': 0,
+                                'points_for': 0.0,
+                                'points_against': 0.0,
+                                'streak': '',
+                                'manager': ''
+                            }
+                            
+                            for info in team_info:
+                                if isinstance(info, list):
+                                    for detail in info:
+                                        if isinstance(detail, dict):
+                                            if 'name' in detail:
+                                                team['name'] = detail['name']
+                                            if 'team_key' in detail:
+                                                team['team_key'] = detail['team_key']
+                                            if 'managers' in detail:
+                                                managers = detail['managers']
+                                                if isinstance(managers, list) and managers:
+                                                    mgr = managers[0].get('manager', {})
+                                                    team['manager'] = mgr.get('nickname', '')
+                                                elif isinstance(managers, dict):
+                                                    mgr = managers.get('0', {}).get('manager', {})
+                                                    team['manager'] = mgr.get('nickname', '')
+                                elif isinstance(info, dict):
+                                    if 'team_standings' in info:
+                                        ts = info['team_standings']
+                                        team['rank'] = int(ts.get('rank', 0))
+                                        team['points_for'] = float(ts.get('points_for', 0))
+                                        team['points_against'] = float(ts.get('points_against', 0))
+                                        
+                                        streak = ts.get('streak', {})
+                                        if streak:
+                                            team['streak'] = f"{streak.get('type', '')[0].upper()}{streak.get('value', '')}"
+                                        
+                                        outcome = ts.get('outcome_totals', {})
+                                        team['wins'] = int(outcome.get('wins', 0))
+                                        team['losses'] = int(outcome.get('losses', 0))
+                                        team['ties'] = int(outcome.get('ties', 0))
+                            
+                            if team['name']:
+                                standings.append(team)
+        except (KeyError, TypeError, IndexError, ValueError) as e:
+            print(f"Error parsing standings: {e}")
+        
+        return sorted(standings, key=lambda x: x['rank'])
+    
+    async def get_all_teams_info(self, league_key: str) -> List[Dict]:
+        """Get information about all teams in the league."""
+        teams_data = await self.client.get_all_teams(league_key)
+        teams = []
+        
+        if not teams_data:
+            return teams
+        
+        try:
+            fantasy_content = teams_data.get('fantasy_content', {})
+            league_data = fantasy_content.get('league', [])
+            
+            if isinstance(league_data, list):
+                for item in league_data:
+                    if isinstance(item, dict) and 'teams' in item:
+                        teams_obj = item['teams']
+                        
+                        if isinstance(teams_obj, dict):
+                            teams_list = [v for k, v in teams_obj.items() if k != 'count']
+                        else:
+                            teams_list = teams_obj if isinstance(teams_obj, list) else []
+                        
+                        for team_data in teams_list:
+                            if not isinstance(team_data, dict):
+                                continue
+                            
+                            team_info = team_data.get('team', [])
+                            if isinstance(team_info, dict):
+                                team_info = [team_info]
+                            
+                            team = {
+                                'name': '',
+                                'team_key': '',
+                                'team_id': '',
+                                'manager': '',
+                                'logo_url': '',
+                                'waiver_priority': 0,
+                                'moves': 0,
+                                'trades': 0
+                            }
+                            
+                            for info in team_info:
+                                if isinstance(info, list):
+                                    for detail in info:
+                                        if isinstance(detail, dict):
+                                            if 'name' in detail:
+                                                team['name'] = detail['name']
+                                            if 'team_key' in detail:
+                                                team['team_key'] = detail['team_key']
+                                            if 'team_id' in detail:
+                                                team['team_id'] = detail['team_id']
+                                            if 'team_logos' in detail:
+                                                logos = detail['team_logos']
+                                                if isinstance(logos, list) and logos:
+                                                    team['logo_url'] = logos[0].get('team_logo', {}).get('url', '')
+                                            if 'managers' in detail:
+                                                managers = detail['managers']
+                                                if isinstance(managers, list) and managers:
+                                                    mgr = managers[0].get('manager', {})
+                                                    team['manager'] = mgr.get('nickname', '')
+                                                elif isinstance(managers, dict):
+                                                    mgr = managers.get('0', {}).get('manager', {})
+                                                    team['manager'] = mgr.get('nickname', '')
+                                            if 'waiver_priority' in detail:
+                                                team['waiver_priority'] = int(detail['waiver_priority'])
+                                            if 'number_of_moves' in detail:
+                                                team['moves'] = int(detail['number_of_moves'])
+                                            if 'number_of_trades' in detail:
+                                                team['trades'] = int(detail['number_of_trades'])
+                                elif isinstance(info, dict):
+                                    if 'name' in info:
+                                        team['name'] = info['name']
+                                    if 'waiver_priority' in info:
+                                        team['waiver_priority'] = int(info['waiver_priority'])
+                                    if 'number_of_moves' in info:
+                                        team['moves'] = int(info['number_of_moves'])
+                                    if 'number_of_trades' in info:
+                                        team['trades'] = int(info['number_of_trades'])
+                            
+                            if team['name']:
+                                teams.append(team)
+        except (KeyError, TypeError, IndexError, ValueError) as e:
+            print(f"Error parsing teams: {e}")
+        
+        return teams
+    
+    async def get_team_roster(self, team_key: str) -> List[Dict]:
+        """Get roster (players) for a specific team."""
+        roster_data = await self.client.get_team_roster(team_key)
+        players = []
+        
+        if not roster_data:
+            return players
+        
+        try:
+            fantasy_content = roster_data.get('fantasy_content', {})
+            team_data = fantasy_content.get('team', [])
+            
+            if isinstance(team_data, list):
+                for item in team_data:
+                    if isinstance(item, dict) and 'roster' in item:
+                        roster_obj = item['roster']
+                        players_obj = roster_obj.get('0', {}).get('players', {})
+                        
+                        if isinstance(players_obj, dict):
+                            players_list = [v for k, v in players_obj.items() if k != 'count']
+                        else:
+                            players_list = players_obj if isinstance(players_obj, list) else []
+                        
+                        for player_data in players_list:
+                            if not isinstance(player_data, dict):
+                                continue
+                            
+                            player_info = player_data.get('player', [])
+                            if isinstance(player_info, dict):
+                                player_info = [player_info]
+                            
+                            player = {
+                                'name': '',
+                                'player_key': '',
+                                'position': '',
+                                'team': '',
+                                'status': '',
+                                'selected_position': ''
+                            }
+                            
+                            for info in player_info:
+                                if isinstance(info, list):
+                                    for detail in info:
+                                        if isinstance(detail, dict):
+                                            if 'name' in detail:
+                                                player['name'] = detail['name'].get('full', '')
+                                            if 'player_key' in detail:
+                                                player['player_key'] = detail['player_key']
+                                            if 'editorial_team_abbr' in detail:
+                                                player['team'] = detail['editorial_team_abbr'].upper()
+                                            if 'display_position' in detail:
+                                                player['position'] = detail['display_position']
+                                            if 'status' in detail:
+                                                player['status'] = detail['status']
+                                elif isinstance(info, dict):
+                                    if 'selected_position' in info:
+                                        sel_pos = info['selected_position']
+                                        if isinstance(sel_pos, list) and sel_pos:
+                                            player['selected_position'] = sel_pos[0].get('position', '')
+                                        elif isinstance(sel_pos, dict):
+                                            player['selected_position'] = sel_pos.get('position', '')
+                            
+                            if player['name']:
+                                players.append(player)
+        except (KeyError, TypeError, IndexError, ValueError) as e:
+            print(f"Error parsing roster: {e}")
+        
+        return players
+
     async def list_all_leagues(self, season: int = None) -> List[Dict]:
         """List all leagues for a given season or all seasons if None."""
         if season:

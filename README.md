@@ -197,7 +197,7 @@ Rank | Team Name      | Record | Points For | Points Against
 ...
 ```
 
-#### 🎯 Weekly Matchups
+#### 🎯 Weekly Matchups *(Coming Soon)*
 Check head-to-head matchups for any week.
 
 ```
@@ -209,7 +209,7 @@ Bulldawgs (127.45) vs Sith Happens (131.20)      ✓ Sith Happens WIN
 ...
 ```
 
-#### 📈 Season Statistics
+#### 📈 Season Statistics *(Coming Soon)*
 Obtain aggregated stats across the entire season.
 
 ```
