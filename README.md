@@ -113,9 +113,36 @@ Copy your **Client ID** and **Client Secret** - you'll need to enter them when r
 
 ## Features
 
-### 🏆 League Treasurer (Prize Money Calculator)
+## Features
 
-The main feature of this application is the **League Treasurer** - a tool that calculates weekly prize money earnings for all teams in your fantasy football league.
+After authenticating and selecting a league, you'll see the main menu:
+
+```
+============================================================
+📌 MAIN MENU
+============================================================
+   1. 🏆 League Treasurer (Prize Money Calculator)
+   2. 📊 View Team Statistics
+   3. 🏈 View Player Rosters
+   4. 🏅 View League Standings
+   5. 🎯 View Weekly Matchups (Coming Soon)
+   6. 📈 View Season Statistics (Coming Soon)
+   7. 🔄 Switch League
+   8. 👋 Exit
+------------------------------------------------------------
+```
+
+---
+
+### 1. 🏆 League Treasurer (Prize Money Calculator)
+
+The main feature of this application - calculates weekly prize money earnings for all teams in your fantasy football league.
+
+**How to Use:**
+1. Select option `1` from the main menu
+2. Enter prize amounts for 1st, 2nd, and 3rd place
+3. Enter the number of weeks to analyze
+4. View the generated prize money table
 
 **Inputs Required:**
 | Input | Description |
@@ -127,8 +154,6 @@ The main feature of this application is the **League Treasurer** - a tool that c
 
 **Output Generated:**
 
-The application generates a comprehensive **Weekly Prize Money Table** showing:
-
 ```
 Team Name           | Wk 1    | Wk 2    | ... | Wk N    | TOTAL
 -----------------------------------------------------------------
@@ -139,7 +164,7 @@ Team B              |    -    | $10.00  | ... | $20.00  | $30.00
 TOTAL PAID OUT      | $45.00  | $45.00  | ... | $45.00  | $630.00
 ```
 
-Plus an **Earnings Leaderboard** ranking teams by total prize money:
+Plus an **Earnings Leaderboard**:
 ```
 🥇 Team A: $100.00
 🥈 Team B: $95.00
@@ -147,59 +172,92 @@ Plus an **Earnings Leaderboard** ranking teams by total prize money:
 ...
 ```
 
-### Other Features
+---
 
-#### 📋 League Information
-View comprehensive details about your fantasy league.
+### 2. 📊 View Team Statistics
 
+View detailed statistics for each team in your league.
+
+**How to Use:**
+1. Select option `2` from the main menu
+2. Statistics for all teams are displayed automatically
+
+**Output Example:**
 ```
-League: x-lte
-Season: 2024
-Teams: 12
-Current Week: 17
-League ID: 530952
-League Key: 449.l.530952
-```
-
-#### 📊 Team Statistics
-Access detailed statistics for each team in your league.
-
-```
-Team: Thunderbolts
-Owner: John D.
-Record: 10-4
-Points For: 1,847.52
-Points Against: 1,623.18
-Streak: W3
-```
-
-#### 🏈 Player Statistics
-Get performance data for individual players.
-
-```
-Player: Josh Allen (QB - BUF)
-Week 14 Stats:
-  Passing Yards: 342
-  Passing TDs: 3
-  Rushing Yards: 45
-  Fantasy Points: 32.68
+──────────────────────────────────────────────────────
+📋 Team #1: Thunderbolts
+──────────────────────────────────────────────────────
+   Manager: John D.
+   Team Key: 449.l.530952.t.1
+   Record: 10-4
+   Points For: 1,847.52
+   Points Against: 1,623.18
+   Streak: W3
+   Waiver Priority: 5
+   Moves: 23
+   Trades: 2
 ```
 
-#### 🏅 League Standings
-View current rankings and playoff positions.
+---
 
+### 3. 🏈 View Player Rosters
+
+View the roster (players) for any team in your league.
+
+**How to Use:**
+1. Select option `3` from the main menu
+2. Choose a specific team or view all teams
+3. View the roster with player positions and status
+
+**Output Example:**
 ```
-Rank | Team Name      | Record | Points For | Points Against
------|----------------|--------|------------|---------------
-  1  | Thunderbolts   | 10-4   | 1,847.52   | 1,623.18
-  2  | Power Rangers  |  9-5   | 1,789.34   | 1,654.22
-  3  | Trojans        |  8-6   | 1,756.89   | 1,701.45
+📋 Thunderbolts - Roster
+────────────────────────────────────────────────────────────
+   Pos   | Player Name                    | Team  | Status
+   -------------------------------------------------------
+   QB    | Josh Allen                     | BUF   | Active
+   WR    | Ja'Marr Chase                  | CIN   | Active
+   WR    | Amon-Ra St. Brown              | DET   | Active
+   RB    | Derrick Henry                  | BAL   | Active
+   RB    | Saquon Barkley                 | PHI   | Active
+   TE    | Travis Kelce                   | KC    | Active
+   K     | Justin Tucker                  | BAL   | Active
+   DEF   | San Francisco 49ers            | SF    | Active
+   BN    | Jayden Daniels                 | WAS   | Active
+   ...
+```
+
+---
+
+### 4. 🏅 View League Standings
+
+View current rankings with records and point totals.
+
+**How to Use:**
+1. Select option `4` from the main menu
+2. Standings are displayed automatically
+
+**Output Example:**
+```
+================================================================================
+🏅 LEAGUE STANDINGS
+================================================================================
+
+Rank   | Team Name        | Record     |   Points For |   Points Against | Streak
+----------------------------------------------------------------------------------
+1      | Thunderbolts     | 10-4       |      1847.52 |          1623.18 |     W3
+2      | Power Rangers    | 9-5        |      1789.34 |          1654.22 |     W1
+3      | Trojans          | 8-6        |      1756.89 |          1701.45 |     L2
 ...
 ```
 
-#### 🎯 Weekly Matchups *(Coming Soon)*
+---
+
+### 5. 🎯 View Weekly Matchups *(Coming Soon)*
+
 Check head-to-head matchups for any week.
 
+**Planned Output:**
 ```
 Week 14 Matchups:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -209,11 +267,15 @@ Bulldawgs (127.45) vs Sith Happens (131.20)      ✓ Sith Happens WIN
 ...
 ```
 
-#### 📈 Season Statistics *(Coming Soon)*
+---
+
+### 6. 📈 View Season Statistics *(Coming Soon)*
+
 Obtain aggregated stats across the entire season.
 
+**Planned Output:**
 ```
-Season Summary (2024):
+Season Summary (2025):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Highest Single Week Score: 186.42 (Thunderbolts, Week 8)
 Lowest Single Week Score: 78.56 (DaBears, Week 3)
@@ -221,6 +283,23 @@ Average Weekly Score: 124.67
 Most Consistent Team: Power Rangers (Std Dev: 12.3)
 Total Points Scored: 20,943.56
 ```
+
+---
+
+### 7. 🔄 Switch League
+
+Switch to a different league without restarting the application.
+
+**How to Use:**
+1. Select option `7` from the main menu
+2. Choose from the list of your available leagues (current league marked with 👈)
+3. Continue using other features with the new league
+
+---
+
+### 8. 👋 Exit
+
+Exit the application. Your credentials are automatically cleared from memory.
 
 ## Contributing
 
