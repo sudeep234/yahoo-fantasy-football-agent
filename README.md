@@ -113,6 +113,42 @@ Copy your **Client ID** and **Client Secret** - you'll need to enter them when r
 
 ## Features
 
+### 🏆 League Treasurer (Prize Money Calculator)
+
+The main feature of this application is the **League Treasurer** - a tool that calculates weekly prize money earnings for all teams in your fantasy football league.
+
+**Inputs Required:**
+| Input | Description |
+|-------|-------------|
+| 1st Place Prize | Dollar amount awarded to the highest scorer each week |
+| 2nd Place Prize | Dollar amount awarded to the second highest scorer each week |
+| 3rd Place Prize | Dollar amount awarded to the third highest scorer each week |
+| Number of Weeks | How many weeks of the season to analyze |
+
+**Output Generated:**
+
+The application generates a comprehensive **Weekly Prize Money Table** showing:
+
+```
+Team Name           | Wk 1    | Wk 2    | ... | Wk N    | TOTAL
+-----------------------------------------------------------------
+Team A              | $20.00  |    -    | ... | $15.00  | $35.00
+Team B              |    -    | $10.00  | ... | $20.00  | $30.00
+...
+-----------------------------------------------------------------
+TOTAL PAID OUT      | $45.00  | $45.00  | ... | $45.00  | $630.00
+```
+
+Plus an **Earnings Leaderboard** ranking teams by total prize money:
+```
+🥇 Team A: $100.00
+🥈 Team B: $95.00
+🥉 Team C: $90.00
+...
+```
+
+### Other Features
+
 - Retrieve league information
 - Access team statistics
 - Get player statistics
