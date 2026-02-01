@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "fantasy-football-treasurer"
+version = "0.1.0"
+description = "Fantasy Football Treasurer - A Python agent to interact with Yahoo Fantasy Football League and retrieve statistics."
+authors = ["Your Name <youremail@example.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+requests = "^2.25.1"
+oauthlib = "^3.1.0"
+requests-oauthlib = "^1.3.0"
+aiohttp = "^3.8.0"
+python-dotenv = "^1.0.0"
+yahoo-oauth = "^2.0.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
